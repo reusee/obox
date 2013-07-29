@@ -9,8 +9,8 @@ type foo struct {
   S string
 }
 
-func TestTcDb(t *testing.T) {
-  db, err := OpenTcDb("foo")
+func TestKcDb(t *testing.T) {
+  db, err := OpenKcDb("foo")
   if err != nil { t.Fatal("open fail", err) }
   defer db.Close()
   err = db.Set("foo", foo{5, "foo"})

@@ -15,12 +15,12 @@ import (
 const cFalse = C.int32_t(0)
 const cTrue = C.int32_t(1)
 
-type TcDb struct {
+type KcDb struct {
   cdb *C.KCDB
 }
 
-func OpenTcDb(dbFile string) (*TcDb, error) {
-  db := new(TcDb)
+func OpenKcDb(dbFile string) (*KcDb, error) {
+  db := new(KcDb)
   cdb := C.kcdbnew()
   cDbFile := C.CString(dbFile + "#type=kch#opts=c#zcomp=lzma#msiz=536870912")
   defer C.free(unsafe.Pointer(cDbFile))
@@ -32,7 +32,7 @@ func OpenTcDb(dbFile string) (*TcDb, error) {
   return db, nil
 }
 
-func (self *TcDb) Set(key string, obj interface{}) (error) {
+func (self *KcDb) Set(key string, obj interface{}) (error) {
   var err error
   buf := new(bytes.Buffer)
   err = encode(buf, obj)
@@ -47,7 +47,7 @@ func (self *TcDb) Set(key string, obj interface{}) (error) {
   return nil
 }
 
-func (self *TcDb) SetDefault(key string, obj interface{}) (bool, error) {
+func (self *KcDb) SetDefault(key string, obj interface{}) (bool, error) {
   cKey := C.CString(key)
   defer C.free(unsafe.Pointer(cKey))
   if C.kcdbcheck(self.cdb, cKey, C.size_t(len(key))) != C.int32_t(-1) {
@@ -66,7 +66,7 @@ func (self *TcDb) SetDefault(key string, obj interface{}) (bool, error) {
   return true, nil
 }
 
-func (self *TcDb) Get(key string, obj interface{}) (error) {
+func (self *KcDb) Get(key string, obj interface{}) (error) {
   var b []byte
   var err error
   cKey := C.CString(key)
@@ -82,7 +82,7 @@ func (self *TcDb) Get(key string, obj interface{}) (error) {
   return nil
 }
 
-func (self *TcDb) Iter(fun func(string, Getter) bool) {
+func (self *KcDb) Iter(fun func(string, Getter) bool) {
   cur := C.kcdbcursor(self.cdb)
   C.kccurjump(cur)
   var kSize, vSize C.size_t
@@ -108,11 +108,11 @@ func (self *TcDb) Iter(fun func(string, Getter) bool) {
   C.kccurdel(cur)
 }
 
-func (self *TcDb) Count() int64 {
+func (self *KcDb) Count() int64 {
   return int64(C.kcdbcount(self.cdb))
 }
 
-func (self *TcDb) Close() error {
+func (self *KcDb) Close() error {
   defer C.kcdbdel(self.cdb)
   if C.kcdbclose(self.cdb) == cFalse {
     return errors.New(fmt.Sprintf("close: %s", C.GoString(C.kcecodename(C.kcdbecode(self.cdb)))))
