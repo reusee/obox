@@ -6,6 +6,7 @@ type Db interface {
   Get(key string, objPointer interface{}) (error)
   Iter(fun func(key string, get Getter) bool)
   Count() int64
+  Close() error
 }
 
 type Getter func(objPointer interface{}) error

@@ -111,3 +111,11 @@ func (self *TcDb) Iter(fun func(string, Getter) bool) {
 func (self *TcDb) Count() int64 {
   return int64(C.kcdbcount(self.cdb))
 }
+
+func (self *TcDb) Close() error {
+  defer C.kcdbdel(self.cdb)
+  if C.kcdbclose(self.cdb) == cFalse {
+    return errors.New(fmt.Sprintf("close: %s", C.GoString(C.kcecodename(C.kcdbecode(self.cdb)))))
+  }
+  return nil
+}
