@@ -12,8 +12,8 @@ import (
   "reflect"
 )
 
-const cFalse = C.int32_t(0)
-const cTrue = C.int32_t(1)
+const kcFalse = C.int32_t(0)
+const kcTrue = C.int32_t(1)
 
 type KcDb struct {
   cdb *C.KCDB
@@ -24,7 +24,7 @@ func OpenKcDb(dbFile string) (*KcDb, error) {
   cdb := C.kcdbnew()
   cDbFile := C.CString(dbFile + "#type=kch#opts=c#zcomp=lzma#msiz=536870912")
   defer C.free(unsafe.Pointer(cDbFile))
-  if C.kcdbopen(cdb, cDbFile, C.KCOWRITER | C.KCOCREATE | C.KCOTRYLOCK) == cFalse {
+  if C.kcdbopen(cdb, cDbFile, C.KCOWRITER | C.KCOCREATE | C.KCOTRYLOCK) == kcFalse {
     errCode := C.kcdbecode(cdb)
     return nil, errors.New(fmt.Sprintf("open: %s", C.GoString(C.kcecodename(errCode))))
   }
@@ -41,7 +41,7 @@ func (self *KcDb) Set(key string, obj interface{}) (error) {
   cKey := C.CString(key)
   defer C.free(unsafe.Pointer(cKey))
   header := (*reflect.SliceHeader)(unsafe.Pointer(&bytes))
-  if C.kcdbset(self.cdb, cKey, C.size_t(len(key)), (*C.char)(unsafe.Pointer(header.Data)), C.size_t(header.Len)) == cFalse {
+  if C.kcdbset(self.cdb, cKey, C.size_t(len(key)), (*C.char)(unsafe.Pointer(header.Data)), C.size_t(header.Len)) == kcFalse {
     return errors.New(fmt.Sprintf("set: %s", key))
   }
   return nil
@@ -60,7 +60,7 @@ func (self *KcDb) SetDefault(key string, obj interface{}) (bool, error) {
   }
   bytes := buf.Bytes()
   header := (*reflect.SliceHeader)(unsafe.Pointer(&bytes))
-  if C.kcdbset(self.cdb, cKey, C.size_t(len(key)), (*C.char)(unsafe.Pointer(header.Data)), C.size_t(header.Len)) == cFalse {
+  if C.kcdbset(self.cdb, cKey, C.size_t(len(key)), (*C.char)(unsafe.Pointer(header.Data)), C.size_t(header.Len)) == kcFalse {
     return false, errors.New(fmt.Sprintf("set: %s", key))
   }
   return true, nil
@@ -89,7 +89,7 @@ func (self *KcDb) Iter(fun func(string, Getter) bool) {
   var vBuff, kBuff *C.char
   var ret bool
   for {
-    kBuff = C.kccurget(cur, &kSize, &vBuff, &vSize, cTrue)
+    kBuff = C.kccurget(cur, &kSize, &vBuff, &vSize, kcTrue)
     if kBuff == nil {
       C.kcfree(unsafe.Pointer(kBuff))
       break
@@ -114,7 +114,7 @@ func (self *KcDb) Count() int64 {
 
 func (self *KcDb) Close() error {
   defer C.kcdbdel(self.cdb)
-  if C.kcdbclose(self.cdb) == cFalse {
+  if C.kcdbclose(self.cdb) == kcFalse {
     return errors.New(fmt.Sprintf("close: %s", C.GoString(C.kcecodename(C.kcdbecode(self.cdb)))))
   }
   return nil
