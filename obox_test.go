@@ -35,6 +35,12 @@ func TestLeveldb(t *testing.T) {
   testDb(t, db)
 }
 
+func TestLsmDb(t *testing.T) {
+  db, err := OpenLsmDb("lsmfoo")
+  if err != nil { t.Fatal("open file", err) }
+  testDb(t, db)
+}
+
 type bar struct {
   I int
   S string
@@ -87,6 +93,12 @@ func BenchmarkKcDbIter(b *testing.B) {
 
 func BenchmarkLeveldbIter(b *testing.B) {
   db, err := OpenLeveldb("levelfoo")
+  if err != nil { b.Fatal("open fail", err) }
+  benchmarkDb(b, db)
+}
+
+func BenchmarkLsmDbIter(b *testing.B) {
+  db, err := OpenLsmDb("lsmfoo")
   if err != nil { b.Fatal("open fail", err) }
   benchmarkDb(b, db)
 }
