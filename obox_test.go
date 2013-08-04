@@ -23,24 +23,6 @@ func testDb(t *testing.T, db Db) {
   if o.S != "foo" { t.Fatal("get wrong") }
 }
 
-func TestKcDb(t *testing.T) {
-  db, err := OpenKcDb("foo")
-  if err != nil { t.Fatal("open fail", err) }
-  testDb(t, db)
-}
-
-func TestLeveldb(t *testing.T) {
-  db, err := OpenLeveldb("levelfoo")
-  if err != nil { t.Fatal("open fail", err) }
-  testDb(t, db)
-}
-
-func TestLsmDb(t *testing.T) {
-  db, err := OpenLsmDb("lsmfoo")
-  if err != nil { t.Fatal("open file", err) }
-  testDb(t, db)
-}
-
 type bar struct {
   I int
   S string
@@ -83,22 +65,4 @@ func benchmarkDb(b *testing.B, db Db) {
   })
   delta = time.Now().Sub(t0)
   fmt.Printf("%v %v\n", delta, delta / time.Duration(n))
-}
-
-func BenchmarkKcDbIter(b *testing.B) {
-  db, err := OpenKcDb("bar")
-  if err != nil { b.Fatal("open fail", err) }
-  benchmarkDb(b, db)
-}
-
-func BenchmarkLeveldbIter(b *testing.B) {
-  db, err := OpenLeveldb("levelfoo")
-  if err != nil { b.Fatal("open fail", err) }
-  benchmarkDb(b, db)
-}
-
-func BenchmarkLsmDbIter(b *testing.B) {
-  db, err := OpenLsmDb("lsmfoo")
-  if err != nil { b.Fatal("open fail", err) }
-  benchmarkDb(b, db)
 }
