@@ -16,17 +16,21 @@ import (
 
 const (
   levelFalse = C.uchar(0)
+  levelCacheCap = C.size_t(10240)
 )
 
 type Leveldb struct {
   cdb *C.leveldb_t
   read_options *C.leveldb_readoptions_t
   write_options *C.leveldb_writeoptions_t
+  cache *C.leveldb_cache_t
 }
 
 func OpenLeveldb(dir string) (*Leveldb, error) {
   options := C.leveldb_options_create()
   C.leveldb_options_set_create_if_missing(options, C.uchar(1))
+  cache := C.leveldb_cache_create_lru(levelCacheCap)
+  C.leveldb_options_set_cache(options, cache)
   cDir := C.CString(dir)
   defer C.free(unsafe.Pointer(cDir))
   var err *C.char
@@ -39,12 +43,16 @@ func OpenLeveldb(dir string) (*Leveldb, error) {
     cdb: db,
     read_options: C.leveldb_readoptions_create(),
     write_options: C.leveldb_writeoptions_create(),
+    cache: cache,
   }
   return leveldb, nil
 }
 
 func (self *Leveldb) Close() error {
   C.leveldb_close(self.cdb)
+  C.leveldb_readoptions_destroy(self.read_options)
+  C.leveldb_writeoptions_destroy(self.write_options)
+  C.leveldb_cache_destroy(self.cache)
   return nil
 }
 

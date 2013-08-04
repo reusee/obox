@@ -45,7 +45,7 @@ type bar struct {
 
 func benchmarkDb(b *testing.B, db Db) {
   fmt.Printf("\n")
-  n := 500000
+  n := 200000
   baar := &bar{
     5,
     "foobarbaz",
